@@ -1,0 +1,18 @@
+--- Web Framework & Server ---
+Flask is used to build the web application and API.
+Gunicorn is a robust WSGI HTTP server for running Python web apps in production.
+Flask==3.0.0
+gunicorn==21.2.0
+
+--- Data Science & Machine Learning ---
+Pandas is used for data manipulation and analysis.
+Numpy is a fundamental package for scientific computing.
+Scikit-learn provides simple and efficient tools for data mining and machine learning.
+pandas==2.1.4
+numpy==1.26.2
+scikit-learn==1.3.2
+
+--- Visualization (Optional but recommended for frontend) ---
+Plotly can be used to generate interactive charts from your data.
+You would typically use this in a notebook or to generate JSON for a library like Plotly.js.
+plotly==5.18.0
