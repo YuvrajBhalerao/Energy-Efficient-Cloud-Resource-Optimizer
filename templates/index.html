@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy-Efficient Cloud Resource Optimizer</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Plotly.js for charting -->
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Use Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for glowing button effect */
+        .glowing-btn {
+            position: relative;
+            color: #4ade80; /* A bright green */
+            cursor: pointer;
+            padding: 0.5rem 1.5rem;
+            border: 0.15em solid #4ade80;
+            border-radius: 0.45em;
+            background: none;
+            perspective: 2em;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            box-shadow: inset 0px 0px 0.5em 0px #4ade80, 0px 0px 0.5em 0px #4ade80;
+            animation: border-flicker 2s linear infinite;
+        }
+
+        .glowing-btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            box-shadow: 0 0 2em 0.5em #4ade80;
+            opacity: 0;
+            background-color: #4ade80;
+            z-index: -1;
+            transition: opacity 100ms linear;
+        }
+
+        .glowing-btn:hover::after, .glowing-btn:focus::after {
+            opacity: 1;
+        }
+
+        .glowing-btn:hover, .glowing-btn:focus {
+            color: #1f2937; /* Dark gray */
+            text-shadow: none;
+        }
+
+        @keyframes border-flicker {
+            0% { box-shadow: inset 0px 0px 0.5em 0px #4ade80, 0px 0px 0.5em 0px #4ade80; }
+            5% { box-shadow: inset 0px 0px 0.2em 0px #4ade80, 0px 0px 0.2em 0px #4ade80; }
+            10% { box-shadow: inset 0px 0px 1em 0px #4ade80, 0px 0px 1em 0px #4ade80; }
+            /* ... add more steps if desired ... */
+            100% { box-shadow: inset 0px 0px 0.5em 0px #4ade80, 0px 0px 0.5em 0px #4ade80; }
+        }
+        
+        /* Custom spinner */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: #4ade80;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl mx-auto space-y-8">
+        <!-- Header Section -->
+        <header class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">
+                Energy-Efficient Cloud Optimizer
+            </h1>
+            <p class="text-lg text-slate-400">
+                Use ML to predict resource usage and simulate cost & energy savings.
+            </p>
+        </header>
+
+        <!-- Action Section -->
+        <div class="text-center">
+            <button id="run-optimization-btn" class="glowing-btn">
+                Run Optimization
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-container" class="hidden">
+            <!-- Loading Spinner -->
+            <div id="loader" class="flex justify-center items-center py-8">
+                <span class="loader"></span>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="hidden bg-red-900 border border-red-600 text-red-200 px-4 py-3 rounded-lg relative text-center">
+                <strong class="font-bold">Error:</strong>
+                <span id="error-text" class="block sm:inline"></span>
+            </div>
+            
+            <!-- Data Display -->
+            <div id="data-display" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Cost Savings Card -->
+                    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-xl text-center">
+                        <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider">Cost Savings</h3>
+                        <p id="cost-savings" class="text-4xl font-bold text-green-400 mt-2">$0.00</p>
+                        <p id="cost-savings-percent" class="text-sm text-green-400">(0.00%)</p>
+                    </div>
+                     <!-- Energy Saved Card -->
+                    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-xl text-center">
+                        <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider">Energy Saved</h3>
+                        <p id="energy-saved" class="text-4xl font-bold text-cyan-400 mt-2">0 kWh</p>
+                        <p class="text-sm text-slate-500">over <span id="total-intervals">0</span> intervals</p>
+                    </div>
+                     <!-- Original vs Optimized Cost Card -->
+                    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-xl text-center">
+                        <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider">Total Cost</h3>
+                        <p class="text-2xl font-bold text-white mt-2">
+                            <span id="optimized-cost" class="text-green-400">$0.00</span>
+                        </p>
+                        <p class="text-sm text-slate-500">
+                            Original: <span id="original-cost" class="line-through">$0.00</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div id="cost-chart" class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-4 rounded-xl"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Element References
+        const runBtn = document.getElementById('run-optimization-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const loader = document.getElementById('loader');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const dataDisplay = document.getElementById('data-display');
+        
+        // Data display elements
+        const costSavingsEl = document.getElementById('cost-savings');
+        const costSavingsPercentEl = document.getElementById('cost-savings-percent');
+        const energySavedEl = document.getElementById('energy-saved');
+        const totalIntervalsEl = document.getElementById('total-intervals');
+        const optimizedCostEl = document.getElementById('optimized-cost');
+        const originalCostEl = document.getElementById('original-cost');
+        const costChartEl = document.getElementById('cost-chart');
+
+        // Attach event listener to the button
+        runBtn.addEventListener('click', runOptimization);
+
+        async function runOptimization() {
+            // --- 1. Set UI to loading state ---
+            resultsContainer.classList.remove('hidden');
+            loader.classList.remove('hidden');
+            dataDisplay.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            runBtn.disabled = true;
+            runBtn.textContent = 'Optimizing...';
+            
+            try {
+                // --- 2. Fetch data from the API ---
+                const response = await fetch('api/run-optimization', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // --- 3. Update UI with successful results ---
+                    updateUI(result.data);
+                    dataDisplay.classList.remove('hidden');
+                } else {
+                    // Handle application-specific errors
+                    throw new Error(result.message);
+                }
+
+            } catch (error) {
+                // --- 4. Display error message on failure ---
+                console.error("Optimization failed:", error);
+                errorText.textContent = error.message;
+                errorMessage.classList.remove('hidden');
+            } finally {
+                // --- 5. Reset UI from loading state ---
+                loader.classList.add('hidden');
+                runBtn.disabled = false;
+                runBtn.textContent = 'Run Optimization';
+            }
+        }
+        
+        function updateUI(data) {
+            // Update the text content of the result cards
+            costSavingsEl.textContent = `$${data.cost_savings.toFixed(2)}`;
+            costSavingsPercentEl.textContent = `(${data.cost_savings_percent.toFixed(2)}%)`;
+            energySavedEl.textContent = `${data.energy_saved_kwh.toFixed(2)} kWh`;
+            totalIntervalsEl.textContent = data.total_intervals;
+            optimizedCostEl.textContent = `$${data.optimized_cost.toFixed(2)}`;
+            originalCostEl.textContent = `$${data.original_cost.toFixed(2)}`;
+            
+            // Create the Plotly chart
+            createChart(data.original_cost, data.optimized_cost);
+        }
+
+        function createChart(originalCost, optimizedCost) {
+            const plotData = [{
+                x: ['Original Cost', 'Optimized Cost'],
+                y: [originalCost, optimizedCost],
+                type: 'bar',
+                marker: {
+                    color: ['#f87171', '#4ade80'] // Red for original, Green for optimized
+                },
+                text: [`$${originalCost.toFixed(2)}`, `$${optimizedCost.toFixed(2)}`],
+                textposition: 'auto',
+            }];
+
+            const layout = {
+                title: {
+                    text: 'Cost Comparison',
+                    font: {
+                        color: '#e2e8f0' // slate-200
+                    }
+                },
+                paper_bgcolor: 'rgba(0,0,0,0)', // Transparent background
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: {
+                    color: '#94a3b8' // slate-400
+                },
+                xaxis: {
+                    gridcolor: '#334155' // slate-700
+                },
+                yaxis: {
+                    title: 'Cost ($)',
+                    gridcolor: '#334155' // slate-700
+                },
+                margin: { l: 50, r: 20, b: 40, t: 60, pad: 4 }
+            };
+
+            Plotly.newPlot(costChartEl, plotData, layout, {responsive: true});
+        }
+    </script>
+</body>
+</html>
+
