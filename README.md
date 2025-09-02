@@ -1,4 +1,4 @@
-Energy-Efficient Cloud Resource Optimizer
+#Energy-Efficient Cloud Resource Optimizer
 !
 
 This project is a Python-based application that uses machine learning to predict resource usage (CPU, GPU, memory) in a cloud environment. Based on these predictions, it dynamically recommends resource allocation strategies to minimize energy consumption and reduce operational costs. It includes a simulator to quantify potential savings in terms of cost and Azure cloud credits.
