@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-import logging # <-- FIX: Import Python's standard logging library
+import logging
 from flask import Flask, render_template, jsonify
 
 # --- Optimizer Module Imports ---
@@ -14,9 +14,11 @@ from optimizer.simulator import simulate_costs
 # --- Create Dummy Data (if it doesn't exist) ---
 def ensure_data_exists():
     """Creates a sample CSV file if one isn't found."""
-    if not os.path.exists('../data/sample_metrics.csv'):
+    # The path is relative to the `src` directory where the app runs
+    data_path = '../data/sample_metrics.csv'
+    if not os.path.exists(data_path):
         print("Creating dummy metrics data...")
-        os.makedirs('../data', exist_ok=True)
+        os.makedirs(os.path.dirname(data_path), exist_ok=True)
         timestamps = pd.to_datetime(pd.date_range(start='2025-01-01', periods=168, freq='h'))
         data = {
             'timestamp': timestamps,
@@ -24,17 +26,14 @@ def ensure_data_exists():
             'gpu_usage': [max(5, min(80, 40 + 15 * (i % 24 - 10) + (i % 7) * 3)) for i in range(168)],
             'memory_usage': [max(20, min(95, 60 + 10 * (i % 24 - 15) + (i % 7) * 4)) for i in range(168)]
         }
-        pd.DataFrame(data).to_csv('../data/sample_metrics.csv', index=False)
+        pd.DataFrame(data).to_csv(data_path, index=False)
 
 # --- Flask App Initialization ---
 app = Flask(__name__, template_folder='../templates')
 
-# Configure logging
-if not app.debug:
-    # In production, log to stderr.
-    stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.INFO)
-    app.logger.addHandler(stream_handler)
+# --- Run initialization logic ---
+# This ensures the data file exists when the app starts in the Render environment.
+ensure_data_exists()
 
 # --- API Routes ---
 @app.route('/')
@@ -64,15 +63,15 @@ def run_optimization():
 
         # 4. Train model and predict for each target resource
         predictor = UsagePredictor()
-        print("UsagePredictor initialized.")
+        app.logger.info("UsagePredictor initialized.")
 
         predictions = {}
         for col in target_cols:
-            print(f"Training model for {col}...")
+            app.logger.info(f"Training model for {col}...")
             # Pass both features and the specific target series for training
             predictor.train(features, targets[col], resource_name=col)
             
-            print(f"Making predictions for {col}...")
+            app.logger.info(f"Making predictions for {col}...")
             # Predict using the same features
             predictions[f'predicted_{col}'] = predictor.predict(features, resource_name=col)
 
@@ -105,11 +104,12 @@ def run_optimization():
         return jsonify({"status": "success", "data": response_data})
 
     except Exception as e:
+        # Use Flask's built-in logger which is now configured by Gunicorn
         app.logger.error(f"An error occurred during optimization: {e}", exc_info=True)
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # --- Main Execution ---
 if __name__ == '__main__':
-    ensure_data_exists()
+    # This block is for local development only
     app.run(debug=True, port=5001)
 
