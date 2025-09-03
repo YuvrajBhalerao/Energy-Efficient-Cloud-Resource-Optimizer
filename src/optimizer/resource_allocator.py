@@ -1,52 +1,39 @@
-def allocate_resources(
-    current_usage: float, 
-    predicted_usage: float, 
-    scale_up_threshold: float = 75.0,
-    scale_down_threshold: float = 30.0
-) -> dict:
-    """
-    Determines the resource allocation action based on current and predicted usage.
+import pandas as pd
 
-    This is a simple rule-based allocator. A more complex system might consider
-    prediction confidence, rate of change, or business rules.
+def allocate_resources(predicted_usage: pd.DataFrame) -> pd.DataFrame:
+    """
+    Determines the appropriate resource allocation action based on predicted usage.
+
+    FIX: The function signature now correctly accepts the 'predicted_usage'
+    DataFrame passed from app.py.
 
     Args:
-        current_usage (float): The current resource usage percentage.
-        predicted_usage (float): The predicted resource usage percentage for the next interval.
-        scale_up_threshold (float): The percentage threshold above which to scale up.
-        scale_down_threshold (float): The percentage threshold below which to scale down.
+        predicted_usage (pd.DataFrame): A DataFrame with columns for
+                                        predicted CPU, GPU, and memory usage.
 
     Returns:
-        dict: A dictionary containing the suggested action and a reason.
+        pd.DataFrame: A DataFrame with the allocation decision ('SCALE_UP',
+                      'SCALE_DOWN', 'MAINTAIN') for each resource.
     """
-    action = "MAINTAIN"
-    reason = "Usage is within optimal thresholds."
+    allocations = pd.DataFrame(index=predicted_usage.index)
 
-    if predicted_usage > scale_up_threshold:
-        action = "SCALE_UP"
-        reason = f"Predicted usage ({predicted_usage:.1f}%) exceeds scale-up threshold of {scale_up_threshold}%. Proactive scaling recommended."
-    elif predicted_usage < scale_down_threshold and current_usage < scale_down_threshold:
-        action = "SCALE_DOWN"
-        reason = f"Both current ({current_usage:.1f}%) and predicted ({predicted_usage:.1f}%) usage are below scale-down threshold of {scale_down_threshold}%. Resources can be conserved."
-    
-    return {"action": action, "reason": reason}
+    # Define thresholds (these can be fine-tuned)
+    SCALE_UP_THRESHOLD = 80.0
+    SCALE_DOWN_THRESHOLD = 40.0
 
-if __name__ == '__main__':
-    # Example Usage
-    print("\n--- Resource Allocator Example ---")
+    for column in predicted_usage.columns:
+        # Extract the base resource name (e.g., 'cpu_usage' from 'predicted_cpu_usage')
+        resource_name = column.replace('predicted_', '')
+        
+        def get_allocation(prediction):
+            if prediction > SCALE_UP_THRESHOLD:
+                return 'SCALE_UP'
+            elif prediction < SCALE_DOWN_THRESHOLD:
+                return 'SCALE_DOWN'
+            else:
+                return 'MAINTAIN'
 
-    # Scenario 1: High predicted usage -> Scale up
-    result1 = allocate_resources(current_usage=70.0, predicted_usage=85.0)
-    print(f"Scenario 1 (High Prediction): {result1}")
+        allocations[f'{resource_name}_allocation'] = predicted_usage[column].apply(get_allocation)
 
-    # Scenario 2: Low usage -> Scale down
-    result2 = allocate_resources(current_usage=25.0, predicted_usage=20.0)
-    print(f"Scenario 2 (Low Prediction): {result2}")
+    return allocations
 
-    # Scenario 3: Stable usage -> Maintain
-    result3 = allocate_resources(current_usage=50.0, predicted_usage=55.0)
-    print(f"Scenario 3 (Stable Prediction): {result3}")
-
-    # Scenario 4: Usage spike predicted, but current is low -> Maintain (prevents thrashing)
-    result4 = allocate_resources(current_usage=28.0, predicted_usage=45.0)
-    print(f"Scenario 4 (Spike Predicted): {result4}")
