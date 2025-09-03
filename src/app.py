@@ -2,8 +2,9 @@ import os
 import pandas as pd
 from flask import Flask, render_template, jsonify, logging
 
-# --- Corrected Imports ---
-# Now that app.py is inside 'src', we can import 'optimizer' directly.
+# --- Corrected Imports (No 'src.' prefix) ---
+# Because the start command now runs from inside the 'src' directory,
+# Python can find the 'optimizer' package directly.
 from optimizer.data_loader import load_and_preprocess_data
 from optimizer.feature_engineer import create_features
 from optimizer.model import UsagePredictor
@@ -11,15 +12,14 @@ from optimizer.resource_allocator import allocate_resources
 from optimizer.simulator import simulate_costs
 
 # --- App Initialization ---
-# Flask needs to know where to find the 'templates' folder.
-# We specify '../templates' because it's one directory up from this file's location.
+# The 'templates' folder is now one level up from this file's execution context.
 app = Flask(__name__, template_folder='../templates')
 
 # --- Dummy Data Generation ---
 def create_dummy_data_if_not_exists():
     """Creates dummy CSV files if they don't already exist."""
-    # Paths are relative to the project root, where the command is run.
-    data_dir = 'data'
+    # The 'data' directory is one level up.
+    data_dir = '../data'
     metrics_path = os.path.join(data_dir, 'sample_metrics.csv')
     
     if not os.path.exists(data_dir):
@@ -54,7 +54,7 @@ def run_optimization_endpoint():
     Full pipeline: Load data, train model, predict, allocate, and simulate.
     """
     try:
-        metrics_path = 'data/sample_metrics.csv'
+        metrics_path = '../data/sample_metrics.csv'
         df = load_and_preprocess_data(metrics_path)
         df = create_features(df)
 
@@ -84,10 +84,11 @@ def run_optimization_endpoint():
 
     except FileNotFoundError:
         app.logger.error("Sample data file not found.")
-        return jsonify({"status": "error", "message": "Sample data file not found. Ensure 'data/sample_metrics.csv' exists."}), 500
+        return jsonify({"status": "error", "message": "Sample data file not found. Ensure '../data/sample_metrics.csv' exists."}), 500
     except Exception as e:
         app.logger.error(f"An error occurred during optimization: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
+
