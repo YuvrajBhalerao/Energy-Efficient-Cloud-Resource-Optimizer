@@ -12,7 +12,7 @@ services:
     # The command to install dependencies from your requirements.txt.
     buildCommand: "pip install -r requirements.txt"
     # The command to start your web server. Gunicorn is a production-ready server.
-    startCommand: "gunicorn app:app"
+    startCommand: "gunicorn src.app:app"
     # plan: free # You can choose 'free' for testing or a paid plan for production.
     # Optional: Set environment variables here if needed.
     # envVars:
