@@ -6,12 +6,12 @@
     <title>Cloud Cost & Energy Optimizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #F8FAFC;
-            color: #1E293B;
+            background-color: #FEFBF6;
+            color: #475569;
         }
         .main-container {
             max-width: 1400px;
@@ -20,24 +20,24 @@
         }
         .card {
             background-color: white;
-            border: 1px solid #E2E8F0;
-            border-radius: 1rem;
+            border: 1px solid #F1F5F9;
+            border-radius: 1.5rem;
             padding: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.03), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
             transition: all 0.3s ease-in-out;
         }
         .card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
-            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
         }
         .btn-primary {
-            background-image: linear-gradient(to right, #2563EB, #3B82F6);
+            background-image: linear-gradient(to right, #F97316, #EA580C);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 7px 20px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 7px 20px rgba(249, 115, 22, 0.4);
         }
         .loader {
             border: 4px solid rgba(255,255,255,0.3);
@@ -52,45 +52,75 @@
             100% { transform: rotate(360deg); }
         }
         .input-field {
-            background-color: #F1F5F9;
-            border: 1px solid #CBD5E1;
-            border-radius: 0.5rem;
-            color: #1E293B;
+            background-color: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 0.75rem;
+            color: #334155;
             padding: 0.75rem 1rem;
             transition: all 0.2s ease;
+            font-weight: 500;
         }
         .input-field:focus {
             outline: none;
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            border-color: #F97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
             background-color: white;
         }
-        .bg-pattern {
+        .bg-gradient-top {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 500px;
-            background-image: url('https://placehold.co/1920x500/EBF4FF/EBF4FF?text=+');
-            background-size: cover;
-            background-position: center;
+            height: 800px;
+            background-image: radial-gradient(circle at 50% 0, #FFF7ED 0%, #FEFBF6 60%);
             z-index: -1;
-            opacity: 0.5;
         }
-        .header-glow {
-            text-shadow: 0 0 20px rgba(255,255,255,0.8);
+        .icon-bg {
+            background-color: #FFF7ED;
+            color: #F97316;
+            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .result-value { transition: color 0.5s ease; }
     </style>
 </head>
 <body class="antialiased">
-    <div class="bg-pattern"></div>
+    <div class="bg-gradient-top"></div>
     <div class="main-container">
         <!-- Header -->
-        <header class="text-center py-16">
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 header-glow">Optimize Your Cloud, Instantly.</h1>
-            <p class="mt-6 text-lg max-w-2xl mx-auto text-slate-600">Leverage AI to intelligently predict resource needs, slash costs, and reduce your carbon footprint.</p>
+        <header class="text-center pt-16 pb-24">
+            <h1 class="text-5xl md:text-7xl font-black tracking-tighter text-slate-900">Stop Guessing. Start Saving.</h1>
+            <p class="mt-6 text-xl max-w-3xl mx-auto text-slate-600">Our AI-driven platform analyzes your cloud usage to deliver concrete, actionable insights for cost and energy reduction. Efficiency is just a click away.</p>
         </header>
+
+        <!-- Features Section -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24 text-center">
+            <div class="space-y-4">
+                <div class="icon-bg mx-auto">
+                    <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 100 15 7.5 7.5 0 000-15zM21 21l-5.197-5.197" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">AI-Powered Predictions</h3>
+                <p class="text-slate-500">Go beyond basic monitoring. Our models learn your usage patterns to predict future needs with stunning accuracy.</p>
+            </div>
+            <div class="space-y-4">
+                <div class="icon-bg mx-auto">
+                    <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Maximize Cost Efficiency</h3>
+                <p class="text-slate-500">Turn insights into dollars. We pinpoint exactly where you're overspending and how to reclaim your budget.</p>
+            </div>
+            <div class="space-y-4">
+                <div class="icon-bg mx-auto">
+                    <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.362-3.362z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Reduce Carbon Footprint</h3>
+                <p class="text-slate-500">Smart scaling isn't just cheap, it's green. Lower your energy consumption and contribute to a sustainable future.</p>
+            </div>
+        </section>
+
 
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -98,7 +128,7 @@
             <div class="lg:col-span-1 space-y-8">
                 <div class="card">
                     <div class="flex items-center mb-6">
-                        <svg class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 16v-2m-6.364-1.636L4.343 18.257m13.814-13.814L16.95 5.05m-1.636 12.728L4.343 6.172m13.814 13.814L6.172 4.343"/></svg>
+                        <svg class="h-8 w-8 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-1.007 1.11-1.226l.554-.22zM12 21.75l.554-.22a2.25 2.25 0 001.11-1.226l.09-.542m-3.513 0l.09.542a2.25 2.25 0 001.11 1.226l.554.22zM12 21.75l-.554.22a2.25 2.25 0 01-1.11 1.226l-.09.542M12 21.75l.09-.542a2.25 2.25 0 00-1.11-1.226l-.554-.22m1.758-13.06l-.554.22a2.25 2.25 0 00-1.11 1.226l-.09.542m3.513 0l-.09-.542a2.25 2.25 0 00-1.11-1.226l-.554-.22m-1.758 13.06l-.09.542a2.25 2.25 0 01-1.11-1.226l-.554-.22m3.513 0l-.554-.22a2.25 2.25 0 01-1.11-1.226l-.09-.542M9.75 12a2.25 2.25 0 114.5 0 2.25 2.25 0 01-4.5 0z" /></svg>
                         <h2 class="text-2xl font-bold ml-3 text-slate-800">Simulation Parameters</h2>
                     </div>
                     
@@ -167,17 +197,17 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div class="card text-center">
                             <h3 class="text-slate-500 font-medium uppercase tracking-wider text-sm">Cost Savings</h3>
-                            <p id="cost-savings" class="text-4xl font-bold mt-2 result-value">$0.00</p>
-                            <p id="cost-savings-percent" class="text-slate-400 mt-1 result-value">(0.00%)</p>
+                            <p id="cost-savings" class="text-4xl font-extrabold mt-2 result-value">$0.00</p>
+                            <p id="cost-savings-percent" class="text-slate-400 mt-1 font-medium result-value">(0.00%)</p>
                         </div>
                         <div class="card text-center">
                             <h3 class="text-slate-500 font-medium uppercase tracking-wider text-sm">Energy Saved</h3>
-                            <p id="energy-saved" class="text-4xl font-bold text-blue-600 mt-2">0.00 kWh</p>
+                            <p id="energy-saved" class="text-4xl font-extrabold text-teal-500 mt-2">0.00 kWh</p>
                             <p id="total-intervals" class="text-slate-400 mt-1">over 0 intervals</p>
                         </div>
                         <div class="card text-center">
                             <h3 class="text-slate-500 font-medium uppercase tracking-wider text-sm">Optimized Cost</h3>
-                            <p id="optimized-cost" class="text-4xl font-bold text-slate-800 mt-2">$0.00</p>
+                            <p id="optimized-cost" class="text-4xl font-extrabold text-slate-800 mt-2">$0.00</p>
                             <p id="original-cost" class="text-slate-400 mt-1">Original: $0.00</p>
                         </div>
                     </div>
@@ -186,10 +216,10 @@
                         <div id="cost-chart" style="width:100%;height:450px;"></div>
                     </div>
                 </div>
-                 <div id="placeholder-card" class="card text-center flex flex-col items-center justify-center h-full">
-                    <svg class="h-16 w-16 text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                    <h3 class="text-xl font-semibold text-slate-700">Your results will appear here</h3>
-                    <p class="text-slate-500 mt-2">Adjust the parameters and click "Run Optimization" to see your potential savings.</p>
+                 <div id="placeholder-card" class="card text-center flex flex-col items-center justify-center h-full min-h-[400px]">
+                    <svg class="h-16 w-16 text-slate-300 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h12M3.75 3h16.5M3.75 3v-1.5A2.25 2.25 0 016 0h12a2.25 2.25 0 012.25 2.25v1.5M3.75 16.5v-1.5A2.25 2.25 0 016 12.75h12a2.25 2.25 0 012.25 2.25v1.5m-16.5 0h16.5m-16.5 0v1.5A2.25 2.25 0 006 20.25h12a2.25 2.25 0 002.25-2.25v-1.5M15 5.25v.01M15 12.75v.01" /></svg>
+                    <h3 class="text-xl font-semibold text-slate-700">Your results are waiting.</h3>
+                    <p class="text-slate-500 mt-2 max-w-sm">Fine-tune your cloud parameters and click the button to reveal your personalized optimization report.</p>
                 </div>
                 <div id="error-box" class="card bg-red-50 border-red-200 text-red-800 p-4 hidden flex items-center">
                     <svg class="h-6 w-6 text-red-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -198,6 +228,15 @@
             </div>
         </div>
     </div>
+    
+    <!-- Footer -->
+    <footer class="mt-24 border-t border-slate-200">
+        <div class="main-container text-center text-slate-500">
+            <p>&copy; 2025 Energy-Efficient Cloud Optimizer. All rights reserved.</p>
+            <p class="mt-2 text-sm">Created by Yuvraj Bhalerao</p>
+        </div>
+    </footer>
+
 
     <script>
         const runBtn = document.getElementById('run-btn');
@@ -283,7 +322,7 @@
                 x: ['Original Cost', 'Optimized Cost'],
                 y: [data.original_cost, data.optimized_cost],
                 type: 'bar',
-                marker: { color: ['#F87171', '#34D399'] },
+                marker: { color: ['#FB7185', '#2DD4BF'] },
                 text: [`$${data.original_cost}`, `$${data.optimized_cost}`],
                 textposition: 'outside',
                 hoverinfo: 'none'
@@ -293,8 +332,8 @@
                 title: { text: 'Cost Comparison', font: { size: 20, color: '#334155' }},
                 paper_bgcolor: 'white',
                 plot_bgcolor: 'white',
-                font: { color: '#475569' },
-                yaxis: { title: 'Cost ($)', gridcolor: '#E2E8F0', zerolinecolor: '#CBD5E1' },
+                font: { color: '#475569', family: 'Inter, sans-serif' },
+                yaxis: { title: 'Cost ($)', gridcolor: '#F1F5F9', zerolinecolor: '#E2E8F0' },
                 bargap: 0.4
             };
 
