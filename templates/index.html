@@ -1,274 +1,254 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy-Efficient Cloud Resource Optimizer</title>
-    <!-- Tailwind CSS for styling -->
+    <title>Energy-Efficient Cloud Optimizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Plotly.js for charting -->
-    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Use Inter font family */
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #0B1120;
+            color: #E0E0E0;
         }
-        /* Custom styles for glowing button effect */
-        .glowing-btn {
-            position: relative;
-            color: #4ade80; /* A bright green */
-            cursor: pointer;
-            padding: 0.5rem 1.5rem;
-            border: 0.15em solid #4ade80;
-            border-radius: 0.45em;
-            background: none;
-            perspective: 2em;
-            font-size: 1.25rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            box-shadow: inset 0px 0px 0.5em 0px #4ade80, 0px 0px 0.5em 0px #4ade80;
-            animation: border-flicker 2s linear infinite;
+        .main-container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 2rem;
         }
-
-        .glowing-btn::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            box-shadow: 0 0 2em 0.5em #4ade80;
-            opacity: 0;
-            background-color: #4ade80;
-            z-index: -1;
-            transition: opacity 100ms linear;
+        .card {
+            background-color: #1A202C;
+            border: 1px solid #2D3748;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
         }
-
-        .glowing-btn:hover::after, .glowing-btn:focus::after {
-            opacity: 1;
+        .btn-glow {
+            box-shadow: 0 0 10px rgba(45, 212, 191, 0.5), 0 0 20px rgba(45, 212, 191, 0.3);
+            transition: all 0.3s ease;
         }
-
-        .glowing-btn:hover, .glowing-btn:focus {
-            color: #1f2937; /* Dark gray */
-            text-shadow: none;
+        .btn-glow:hover {
+            box-shadow: 0 0 15px rgba(45, 212, 191, 0.8), 0 0 30px rgba(45, 212, 191, 0.5);
         }
-
-        @keyframes border-flicker {
-            0% { box-shadow: inset 0px 0px 0.5em 0px #4ade80, 0px 0px 0.5em 0px #4ade80; }
-            5% { box-shadow: inset 0px 0px 0.2em 0px #4ade80, 0px 0px 0.2em 0px #4ade80; }
-            10% { box-shadow: inset 0px 0px 1em 0px #4ade80, 0px 0px 1em 0px #4ade80; }
-            /* ... add more steps if desired ... */
-            100% { box-shadow: inset 0px 0px 0.5em 0px #4ade80, 0px 0px 0.5em 0px #4ade80; }
-        }
-        
-        /* Custom spinner */
         .loader {
-            width: 48px;
-            height: 48px;
-            border: 5px solid #FFF;
-            border-bottom-color: #4ade80;
+            border: 4px solid #2D3748;
+            border-top: 4px solid #2DD4BF;
             border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
-            animation: rotation 1s linear infinite;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
         }
-
-        @keyframes rotation {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .input-field {
+            background-color: #2D3748;
+            border: 1px solid #4A5568;
+            border-radius: 0.5rem;
+            color: #E0E0E0;
+            padding: 0.5rem 0.75rem;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #2DD4BF;
+            box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.5);
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-200 flex items-center justify-center min-h-screen p-4">
-
-    <div class="w-full max-w-4xl mx-auto space-y-8">
-        <!-- Header Section -->
-        <header class="text-center">
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">
-                Energy-Efficient Cloud Optimizer
-            </h1>
-            <p class="text-lg text-slate-400">
-                Use ML to predict resource usage and simulate cost & energy savings.
-            </p>
+<body class="antialiased">
+    <div class="main-container">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white">Energy-Efficient Cloud Optimizer</h1>
+            <p class="mt-4 text-lg text-gray-400">Use ML to predict resource usage and simulate cost & energy savings.</p>
         </header>
 
-        <!-- Action Section -->
-        <div class="text-center">
-            <button id="run-optimization-btn" class="glowing-btn">
-                Run Optimization
+        <!-- Simulation Parameters -->
+        <div class="card mb-8">
+            <h2 class="text-2xl font-semibold mb-6 text-white border-b border-gray-700 pb-3">Simulation Parameters</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Cost Parameters -->
+                <div>
+                    <h3 class="text-lg font-medium text-teal-400 mb-3">Cost per Hour ($)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="cpu_cost" class="block text-sm font-medium text-gray-300">CPU Cost / %hr</label>
+                            <input type="number" id="cpu_cost_per_hour" value="0.05" step="0.01" class="input-field w-full mt-1">
+                        </div>
+                        <div>
+                            <label for="gpu_cost" class="block text-sm font-medium text-gray-300">GPU Cost / %hr</label>
+                            <input type="number" id="gpu_cost_per_hour" value="0.15" step="0.01" class="input-field w-full mt-1">
+                        </div>
+                        <div>
+                            <label for="memory_cost" class="block text-sm font-medium text-gray-300">Memory Cost / %hr</label>
+                            <input type="number" id="memory_cost_per_hour" value="0.02" step="0.01" class="input-field w-full mt-1">
+                        </div>
+                    </div>
+                </div>
+                <!-- Energy Parameters -->
+                <div>
+                    <h3 class="text-lg font-medium text-teal-400 mb-3">Energy per Hour (kWh)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="cpu_energy" class="block text-sm font-medium text-gray-300">CPU kWh / %hr</label>
+                            <input type="number" id="cpu_energy_kwh" value="0.01" step="0.005" class="input-field w-full mt-1">
+                        </div>
+                        <div>
+                            <label for="gpu_energy" class="block text-sm font-medium text-gray-300">GPU kWh / %hr</label>
+                            <input type="number" id="gpu_energy_kwh" value="0.03" step="0.005" class="input-field w-full mt-1">
+                        </div>
+                        <div>
+                            <label for="memory_energy" class="block text-sm font-medium text-gray-300">Memory kWh / %hr</label>
+                            <input type="number" id="memory_energy_kwh" value="0.005" step="0.001" class="input-field w-full mt-1">
+                        </div>
+                    </div>
+                </div>
+                <!-- Scaling Parameters -->
+                <div>
+                    <h3 class="text-lg font-medium text-teal-400 mb-3">Scaling Targets (%)</h3>
+                     <div class="space-y-3">
+                        <div>
+                            <label for="scale_down_target" class="block text-sm font-medium text-gray-300">Scale-Down Target</label>
+                            <input type="number" id="scale_down_target" value="30" step="1" class="input-field w-full mt-1">
+                        </div>
+                        <div>
+                            <label for="scale_up_target" class="block text-sm font-medium text-gray-300">Scale-Up Target</label>
+                            <input type="number" id="scale_up_target" value="60" step="1" class="input-field w-full mt-1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Center -->
+        <div class="text-center mb-8">
+            <button id="run-btn" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full text-lg btn-glow inline-flex items-center">
+                <span id="btn-text">Run Optimization</span>
+                <div id="loader" class="loader ml-3 hidden"></div>
             </button>
         </div>
 
-        <!-- Results Section -->
+        <!-- Results Display -->
         <div id="results-container" class="hidden">
-            <!-- Loading Spinner -->
-            <div id="loader" class="flex justify-center items-center py-8">
-                <span class="loader"></span>
-            </div>
-
-            <!-- Error Message -->
-            <div id="error-message" class="hidden bg-red-900 border border-red-600 text-red-200 px-4 py-3 rounded-lg relative text-center">
-                <strong class="font-bold">Error:</strong>
-                <span id="error-text" class="block sm:inline"></span>
-            </div>
+            <div id="error-box" class="card bg-red-900 border-red-700 text-white p-4 mb-8 hidden"></div>
             
-            <!-- Data Display -->
-            <div id="data-display" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <!-- Cost Savings Card -->
-                    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-xl text-center">
-                        <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider">Cost Savings</h3>
-                        <p id="cost-savings" class="text-4xl font-bold text-green-400 mt-2">$0.00</p>
-                        <p id="cost-savings-percent" class="text-sm text-green-400">(0.00%)</p>
-                    </div>
-                     <!-- Energy Saved Card -->
-                    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-xl text-center">
-                        <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider">Energy Saved</h3>
-                        <p id="energy-saved" class="text-4xl font-bold text-cyan-400 mt-2">0 kWh</p>
-                        <p class="text-sm text-slate-500">over <span id="total-intervals">0</span> intervals</p>
-                    </div>
-                     <!-- Original vs Optimized Cost Card -->
-                    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-xl text-center">
-                        <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider">Total Cost</h3>
-                        <p class="text-2xl font-bold text-white mt-2">
-                            <span id="optimized-cost" class="text-green-400">$0.00</span>
-                        </p>
-                        <p class="text-sm text-slate-500">
-                            Original: <span id="original-cost" class="line-through">$0.00</span>
-                        </p>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="card text-center">
+                    <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider">Cost Savings</h3>
+                    <p id="cost-savings" class="text-4xl font-bold text-green-400 mt-2">$0.00</p>
+                    <p id="cost-savings-percent" class="text-gray-400 mt-1">(0.00%)</p>
                 </div>
+                <div class="card text-center">
+                    <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider">Energy Saved</h3>
+                    <p id="energy-saved" class="text-4xl font-bold text-blue-400 mt-2">0.00 kWh</p>
+                    <p id="total-intervals" class="text-gray-400 mt-1">over 0 intervals</p>
+                </div>
+                <div class="card text-center">
+                    <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider">Total Cost</h3>
+                    <p id="optimized-cost" class="text-4xl font-bold text-white mt-2">$0.00</p>
+                    <p id="original-cost" class="text-gray-400 mt-1">Original: $0.00</p>
+                </div>
+            </div>
 
-                <!-- Chart Container -->
-                <div id="cost-chart" class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-4 rounded-xl"></div>
+            <div class="card">
+                <div id="cost-chart" style="width:100%;height:400px;"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // DOM Element References
-        const runBtn = document.getElementById('run-optimization-btn');
-        const resultsContainer = document.getElementById('results-container');
+        const runBtn = document.getElementById('run-btn');
+        const btnText = document.getElementById('btn-text');
         const loader = document.getElementById('loader');
-        const errorMessage = document.getElementById('error-message');
-        const errorText = document.getElementById('error-text');
-        const dataDisplay = document.getElementById('data-display');
-        
-        // Data display elements
-        const costSavingsEl = document.getElementById('cost-savings');
-        const costSavingsPercentEl = document.getElementById('cost-savings-percent');
-        const energySavedEl = document.getElementById('energy-saved');
-        const totalIntervalsEl = document.getElementById('total-intervals');
-        const optimizedCostEl = document.getElementById('optimized-cost');
-        const originalCostEl = document.getElementById('original-cost');
-        const costChartEl = document.getElementById('cost-chart');
+        const resultsContainer = document.getElementById('results-container');
+        const errorBox = document.getElementById('error-box');
 
-        // Attach event listener to the button
         runBtn.addEventListener('click', runOptimization);
 
         async function runOptimization() {
-            // --- 1. Set UI to loading state ---
-            resultsContainer.classList.remove('hidden');
+            // Show loader and disable button
+            btnText.textContent = 'Optimizing...';
             loader.classList.remove('hidden');
-            dataDisplay.classList.add('hidden');
-            errorMessage.classList.add('hidden');
             runBtn.disabled = true;
-            runBtn.textContent = 'Optimizing...';
-            
+            resultsContainer.classList.add('hidden');
+            errorBox.classList.add('hidden');
+
             try {
-                // --- 2. Fetch data from the API ---
+                // Collect parameters from input fields
+                const simulationParams = {
+                    cpu_cost_per_hour: parseFloat(document.getElementById('cpu_cost_per_hour').value),
+                    gpu_cost_per_hour: parseFloat(document.getElementById('gpu_cost_per_hour').value),
+                    memory_cost_per_hour: parseFloat(document.getElementById('memory_cost_per_hour').value),
+                    cpu_energy_kwh: parseFloat(document.getElementById('cpu_energy_kwh').value),
+                    gpu_energy_kwh: parseFloat(document.getElementById('gpu_energy_kwh').value),
+                    memory_energy_kwh: parseFloat(document.getElementById('memory_energy_kwh').value),
+                    scale_down_target: parseFloat(document.getElementById('scale_down_target').value),
+                    scale_up_target: parseFloat(document.getElementById('scale_up_target').value),
+                };
+
                 const response = await fetch('api/run-optimization', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(simulationParams)
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                }
                 
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    // --- 3. Update UI with successful results ---
                     updateUI(result.data);
-                    dataDisplay.classList.remove('hidden');
                 } else {
-                    // Handle application-specific errors
-                    throw new Error(result.message);
+                    throw new Error(result.message || 'An unknown error occurred.');
                 }
-
             } catch (error) {
-                // --- 4. Display error message on failure ---
-                console.error("Optimization failed:", error);
-                errorText.textContent = error.message;
-                errorMessage.classList.remove('hidden');
+                console.error('Optimization failed:', error);
+                errorBox.textContent = `Error: ${error.message}`;
+                errorBox.classList.remove('hidden');
             } finally {
-                // --- 5. Reset UI from loading state ---
+                // Hide loader and re-enable button
+                btnText.textContent = 'Run Optimization';
                 loader.classList.add('hidden');
                 runBtn.disabled = false;
-                runBtn.textContent = 'Run Optimization';
             }
         }
-        
-        function updateUI(data) {
-            // Update the text content of the result cards
-            costSavingsEl.textContent = `$${data.cost_savings.toFixed(2)}`;
-            costSavingsPercentEl.textContent = `(${data.cost_savings_percent.toFixed(2)}%)`;
-            energySavedEl.textContent = `${data.energy_saved_kwh.toFixed(2)} kWh`;
-            totalIntervalsEl.textContent = data.total_intervals;
-            optimizedCostEl.textContent = `$${data.optimized_cost.toFixed(2)}`;
-            originalCostEl.textContent = `$${data.original_cost.toFixed(2)}`;
-            
-            // Create the Plotly chart
-            createChart(data.original_cost, data.optimized_cost);
-        }
 
-        function createChart(originalCost, optimizedCost) {
+        function updateUI(data) {
+            document.getElementById('cost-savings').textContent = `$${data.cost_savings}`;
+            document.getElementById('cost-savings-percent').textContent = `(${data.cost_savings_percent}%)`;
+            document.getElementById('energy-saved').textContent = `${data.energy_saved_kwh} kWh`;
+            document.getElementById('total-intervals').textContent = `over ${data.total_intervals} intervals`;
+            document.getElementById('optimized-cost').textContent = `$${data.optimized_cost}`;
+            document.getElementById('original-cost').textContent = `Original: $${data.original_cost}`;
+            
+            // Unhide the results
+            resultsContainer.classList.remove('hidden');
+
+            // Update chart
             const plotData = [{
                 x: ['Original Cost', 'Optimized Cost'],
-                y: [originalCost, optimizedCost],
+                y: [data.original_cost, data.optimized_cost],
                 type: 'bar',
                 marker: {
-                    color: ['#f87171', '#4ade80'] // Red for original, Green for optimized
+                    color: ['#EF4444', '#2DD4BF']
                 },
-                text: [`$${originalCost.toFixed(2)}`, `$${optimizedCost.toFixed(2)}`],
+                text: [`$${data.original_cost}`, `$${data.optimized_cost}`],
                 textposition: 'auto',
             }];
 
             const layout = {
-                title: {
-                    text: 'Cost Comparison',
-                    font: {
-                        color: '#e2e8f0' // slate-200
-                    }
-                },
-                paper_bgcolor: 'rgba(0,0,0,0)', // Transparent background
+                title: 'Cost Comparison',
+                paper_bgcolor: 'rgba(0,0,0,0)',
                 plot_bgcolor: 'rgba(0,0,0,0)',
-                font: {
-                    color: '#94a3b8' // slate-400
-                },
-                xaxis: {
-                    gridcolor: '#334155' // slate-700
-                },
-                yaxis: {
-                    title: 'Cost ($)',
-                    gridcolor: '#334155' // slate-700
-                },
-                margin: { l: 50, r: 20, b: 40, t: 60, pad: 4 }
+                font: { color: '#E0E0E0' },
+                yaxis: { title: 'Cost ($)', gridcolor: '#2D3748' },
             };
 
-            Plotly.newPlot(costChartEl, plotData, layout, {responsive: true});
+            Plotly.newPlot('cost-chart', plotData, layout, {responsive: true});
         }
     </script>
 </body>
