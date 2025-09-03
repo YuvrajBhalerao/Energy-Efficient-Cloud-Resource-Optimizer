@@ -1,103 +1,59 @@
 import pandas as pd
 
-# --- Constants for Simulation (Azure-like pricing) ---
-# These are hypothetical costs. Replace with actuals from a cloud provider.
-COST_CPU_PER_HOUR = 0.05  # Cost for one vCPU core per hour
-COST_GPU_PER_HOUR = 0.50  # Cost for one GPU (e.g., T4) per hour
-COST_MEM_GB_PER_HOUR = 0.01 # Cost for 1 GB of RAM per hour
-
-# Power constants (hypothetical)
-POWER_CPU_WATT_PER_PERCENT = 1.5 # Watts per 1% of CPU utilization
-POWER_GPU_WATT_PER_PERCENT = 3.0 # Watts per 1% of GPU utilization
-
-def run_simulation(
-    df_metrics: pd.DataFrame, 
-    predictions: dict,
-    allocation_logic: callable
-) -> dict:
+def simulate_costs(df_allocations: pd.DataFrame) -> pd.DataFrame:
     """
-    Simulates the cost and energy savings based on optimized resource allocation.
+    Simulates the cost savings and energy reduction based on allocation decisions.
+
+    This function calculates costs based on predefined rates for CPU, GPU, and memory,
+    and then computes the savings achieved by the resource allocator's decisions.
 
     Args:
-        df_metrics (pd.DataFrame): DataFrame with actual usage columns 
-                                   (e.g., 'cpu_usage', 'gpu_usage').
-        predictions (dict): A dictionary with predicted usage, e.g., 
-                            {'cpu': [pred1, pred2], 'gpu': [pred1, pred2]}.
-        allocation_logic (callable): A function (like `allocate_resources`) that 
-                                     returns an action string.
+        df_allocations (pd.DataFrame): The DataFrame containing original usage
+                                       and optimized allocation columns.
 
     Returns:
-        dict: A dictionary summarizing the simulation results.
+        pd.DataFrame: The input DataFrame with added columns for original cost,
+                      optimized cost, cost saved, and energy saved.
     """
-    total_original_cost = 0
-    total_optimized_cost = 0
-    total_original_kwh = 0
-    total_optimized_kwh = 0
-    
-    num_intervals = len(df_metrics)
+    # --- Define Cost and Energy Parameters ---
+    # These values can be adjusted or moved to a configuration file.
+    CPU_COST_PER_HOUR = 0.05        # Cost for 100% CPU utilization for one hour
+    GPU_COST_PER_HOUR = 0.25        # Cost for 100% GPU utilization for one hour
+    MEMORY_GB_COST_PER_HOUR = 0.01  # Cost per GB of memory per hour
+    TOTAL_MEMORY_GB = 16            # Assuming a total of 16 GB memory for percentage calculations
 
-    for i in range(num_intervals):
-        # --- Original Cost Calculation ---
-        current_cpu = df_metrics['cpu_usage'].iloc[i]
-        current_gpu = df_metrics['gpu_usage'].iloc[i]
-        
-        # Assume original plan is always provisioned at 100% capacity
-        original_cost_interval = COST_CPU_PER_HOUR + COST_GPU_PER_HOUR
-        original_power_interval = (POWER_CPU_WATT_PER_PERCENT * current_cpu) + (POWER_GPU_WATT_PER_PERCENT * current_gpu)
-        
-        total_original_cost += original_cost_interval
-        total_original_kwh += original_power_interval / 1000 # Convert watts to kWh
+    CPU_ENERGY_FACTOR_KWH = 0.001   # kWh saved per 1% CPU reduction per hour
+    GPU_ENERGY_FACTOR_KWH = 0.003   # kWh saved per 1% GPU reduction per hour
 
-        # --- Optimized Cost Calculation ---
-        pred_cpu = predictions['cpu'][i]
-        
-        # Get allocation action from the provided logic
-        cpu_action = allocation_logic(current_usage=current_cpu, predicted_usage=pred_cpu)['action']
-        
-        # Simplified cost model for optimizer
-        # Assume we can scale to a smaller instance (e.g., half size)
-        if cpu_action == 'SCALE_DOWN':
-            optimized_cost_interval = original_cost_interval * 0.5 # Half the cost
-            optimized_power_interval = original_power_interval * 0.6 # Reduced power
-        else: # MAINTAIN or SCALE_UP (assume we stay on the same instance size for simplicity)
-            optimized_cost_interval = original_cost_interval
-            optimized_power_interval = original_power_interval
+    # --- Cost Calculation ---
 
-        total_optimized_cost += optimized_cost_interval
-        total_optimized_kwh += optimized_power_interval / 1000
+    # 1. Calculate the original cost based on actual historical usage
+    df_allocations['original_cost'] = (
+        (df_allocations['cpu_usage'] / 100 * CPU_COST_PER_HOUR) +
+        (df_allocations['gpu_usage'] / 100 * GPU_COST_PER_HOUR) +
+        (df_allocations['memory_usage'] / 100 * TOTAL_MEMORY_GB * MEMORY_GB_COST_PER_HOUR)
+    )
 
-    # --- Summarize Results ---
-    cost_saved = total_original_cost - total_optimized_cost
-    energy_saved_kwh = total_original_kwh - total_optimized_kwh
-    
-    return {
-        "total_intervals": num_intervals,
-        "original_cost": round(total_original_cost, 2),
-        "optimized_cost": round(total_optimized_cost, 2),
-        "cost_savings": round(cost_saved, 2),
-        "cost_savings_percent": round((cost_saved / total_original_cost) * 100 if total_original_cost > 0 else 0, 2),
-        "energy_saved_kwh": round(energy_saved_kwh, 2),
-    }
+    # 2. Calculate the new, optimized cost based on the allocated resources
+    df_allocations['optimized_cost'] = (
+        (df_allocations['allocated_cpu'] / 100 * CPU_COST_PER_HOUR) +
+        (df_allocations['allocated_gpu'] / 100 * GPU_COST_PER_HOUR) +
+        (df_allocations['allocated_memory'] / 100 * TOTAL_MEMORY_GB * MEMORY_GB_COST_PER_HOUR)
+    )
 
-if __name__ == '__main__':
-    from resource_allocator import allocate_resources # For example usage
+    # 3. Calculate the savings
+    df_allocations['cost_saved'] = df_allocations['original_cost'] - df_allocations['optimized_cost']
 
-    print("\n--- Simulator Example ---")
-    
-    # Create sample data
-    actual_data = pd.DataFrame({
-        'cpu_usage': [25, 22, 28, 70, 80, 25],
-        'gpu_usage': [10, 12, 15, 50, 55, 10]
-    })
+    # --- Energy Savings Calculation ---
 
-    # Create sample predictions
-    predicted_vals = {
-        'cpu': [20, 21, 25, 75, 78, 22],
-        'gpu': [11, 13, 14, 52, 53, 12]
-    }
+    # Calculate the reduction in resource usage. Use .clip(lower=0) to ignore cases where usage increased.
+    cpu_reduction = (df_allocations['cpu_usage'] - df_allocations['allocated_cpu']).clip(lower=0)
+    gpu_reduction = (df_allocations['gpu_usage'] - df_allocations['allocated_gpu']).clip(lower=0)
 
-    results = run_simulation(actual_data, predicted_vals, allocate_resources)
-    
-    print("\nSimulation Results:")
-    for key, value in results.items():
-        print(f"  {key.replace('_', ' ').title()}: {value}")
+    df_allocations['energy_saved_kwh'] = (
+        (cpu_reduction * CPU_ENERGY_FACTOR_KWH) +
+        (gpu_reduction * GPU_ENERGY_FACTOR_KWH)
+    )
+
+    return df_allocations
+
