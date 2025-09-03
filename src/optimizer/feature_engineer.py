@@ -1,72 +1,35 @@
 import pandas as pd
 
-def create_time_features(df: pd.DataFrame, timestamp_col: str) -> pd.DataFrame:
+def create_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Creates time-based features from a timestamp column.
+    Engineers time-based features from the DataFrame's index.
+
+    This function was renamed from 'create_time_features' to 'create_features'
+    to match the import in the main app.py file.
 
     Args:
-        df (pd.DataFrame): The input DataFrame with a timestamp column.
-        timestamp_col (str): The name of the timestamp column.
+        df (pd.DataFrame): DataFrame with a DatetimeIndex.
 
     Returns:
-        pd.DataFrame: The DataFrame with added time-based features.
+        pd.DataFrame: DataFrame with added time-based features.
     """
-    if timestamp_col not in df.columns or not pd.api.types.is_datetime64_any_dtype(df[timestamp_col]):
-        raise ValueError(f"Column '{timestamp_col}' must be a datetime type.")
+    # Ensure the index is a DatetimeIndex
+    if not isinstance(df.index, pd.DatetimeIndex):
+        raise TypeError("DataFrame index must be a DatetimeIndex.")
 
-    df['hour'] = df[timestamp_col].dt.hour
-    df['day_of_week'] = df[timestamp_col].dt.dayofweek # Monday=0, Sunday=6
-    df['day_of_month'] = df[timestamp_col].dt.day
-    df['month'] = df[timestamp_col].dt.month
-    
-    print("Created time-based features: hour, day_of_week, day_of_month, month.")
+    df['hour'] = df.index.hour
+    df['day_of_week'] = df.index.dayofweek
+    df['day_of_year'] = df.index.dayofyear
+    df['month'] = df.index.month
+    df['week_of_year'] = df.index.isocalendar().week.astype(int)
+
+    # Lag features (e.g., usage in the previous hour)
+    df['cpu_lag_1'] = df['cpu_usage'].shift(1).fillna(method='bfill')
+    df['gpu_lag_1'] = df['gpu_usage'].shift(1).fillna(method='bfill')
+
+    # Rolling window features (e.g., average usage over the last 3 hours)
+    df['cpu_rolling_mean_3'] = df['cpu_usage'].rolling(window=3, min_periods=1).mean()
+    df['gpu_rolling_mean_3'] = df['gpu_usage'].rolling(window=3, min_periods=1).mean()
+
     return df
 
-def create_rolling_features(df: pd.DataFrame, columns: list, window_sizes: list) -> pd.DataFrame:
-    """
-    Creates rolling window features (e.g., moving averages) for specified columns.
-
-    Args:
-        df (pd.DataFrame): The input DataFrame.
-        columns (list): A list of column names to create rolling features for.
-        window_sizes (list): A list of integer window sizes (e.g., [3, 7, 14]).
-
-    Returns:
-        pd.DataFrame: The DataFrame with added rolling features.
-    """
-    for col in columns:
-        if col not in df.columns:
-            print(f"Warning: Column '{col}' not found for rolling feature creation. Skipping.")
-            continue
-        for window in window_sizes:
-            feature_name = f'{col}_rolling_mean_{window}'
-            df[feature_name] = df[col].rolling(window=window, min_periods=1).mean()
-            print(f"Created rolling feature: {feature_name}")
-            
-    return df
-
-if __name__ == '__main__':
-    # Example Usage
-    print("\n--- Feature Engineer Example ---")
-    data = {
-        'timestamp': pd.to_datetime(['2023-01-01 00:00', '2023-01-01 01:00', '2023-01-01 02:00', '2023-01-01 03:00']),
-        'cpu_usage': [20, 25, 22, 30]
-    }
-    example_df = pd.DataFrame(data)
-    
-    print("\nOriginal DataFrame:")
-    print(example_df)
-    
-    # 1. Create time features
-    df_with_time_features = create_time_features(example_df.copy(), 'timestamp')
-    print("\nDataFrame with Time Features:")
-    print(df_with_time_features)
-
-    # 2. Create rolling features
-    df_with_rolling_features = create_rolling_features(
-        df_with_time_features,
-        columns=['cpu_usage'],
-        window_sizes=[2, 3]
-    )
-    print("\nDataFrame with Rolling Features:")
-    print(df_with_rolling_features)
