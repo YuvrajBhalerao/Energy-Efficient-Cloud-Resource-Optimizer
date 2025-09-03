@@ -1,27 +1,30 @@
 import pandas as pd
 
-# --- Constants for Simulation ---
-CPU_COST_PER_HOUR = 0.05  # Arbitrary cost per % CPU utilization per hour
-GPU_COST_PER_HOUR = 0.15  # Arbitrary cost per % GPU utilization per hour
-MEMORY_COST_PER_HOUR = 0.02 # Arbitrary cost per % Memory utilization per hour
-
-# Energy constants (e.g., kWh per % utilization per hour)
-CPU_ENERGY_KWH = 0.01
-GPU_ENERGY_KWH = 0.03
-MEMORY_ENERGY_KWH = 0.005
-
-def simulate_costs(combined_df: pd.DataFrame) -> pd.DataFrame:
+def simulate_costs(combined_df: pd.DataFrame, simulation_params: dict) -> pd.DataFrame:
     """
     Simulates the cost and energy savings based on resource allocations.
 
     Args:
         combined_df (pd.DataFrame): DataFrame containing original usage
                                     and allocation decisions.
+        simulation_params (dict): A dictionary containing the cost, energy,
+                                  and scaling parameters for the simulation.
 
     Returns:
         pd.DataFrame: DataFrame with original cost, optimized cost, and savings.
     """
     results_df = combined_df.copy()
+
+    # --- Use parameters from the input dictionary ---
+    CPU_COST_PER_HOUR = simulation_params.get('cpu_cost_per_hour', 0.05)
+    GPU_COST_PER_HOUR = simulation_params.get('gpu_cost_per_hour', 0.15)
+    MEMORY_COST_PER_HOUR = simulation_params.get('memory_cost_per_hour', 0.02)
+    CPU_ENERGY_KWH = simulation_params.get('cpu_energy_kwh', 0.01)
+    GPU_ENERGY_KWH = simulation_params.get('gpu_energy_kwh', 0.03)
+    MEMORY_ENERGY_KWH = simulation_params.get('memory_energy_kwh', 0.005)
+    SCALE_DOWN_TARGET = simulation_params.get('scale_down_target', 30.0)
+    SCALE_UP_TARGET = simulation_params.get('scale_up_target', 60.0)
+
 
     # --- Calculate Original Cost & Energy ---
     results_df['original_cost'] = (
@@ -38,14 +41,8 @@ def simulate_costs(combined_df: pd.DataFrame) -> pd.DataFrame:
     # --- Calculate Optimized Usage ---
     def get_allocated_usage(row, resource_type):
         """Calculates the new usage percentage based on the allocation decision."""
-        # FIX: Column names now correctly match the output of resource_allocator.py
-        # e.g., 'cpu_usage_allocation', 'gpu_usage_allocation'
         allocation_decision = row[f'{resource_type}_allocation']
         original_usage = row[resource_type]
-
-        # Define how much to scale up or down (can be fine-tuned)
-        SCALE_DOWN_TARGET = 30.0  # Target usage % after scaling down
-        SCALE_UP_TARGET = 60.0    # Target usage % after scaling up (assumes new capacity)
 
         if allocation_decision == 'SCALE_DOWN':
             return SCALE_DOWN_TARGET
