@@ -1,59 +1,79 @@
 import pandas as pd
 
-def simulate_costs(df_allocations: pd.DataFrame) -> pd.DataFrame:
-    """
-    Simulates the cost savings and energy reduction based on allocation decisions.
+# --- Constants for Simulation ---
+CPU_COST_PER_HOUR = 0.05  # Arbitrary cost per % CPU utilization per hour
+GPU_COST_PER_HOUR = 0.15  # Arbitrary cost per % GPU utilization per hour
+MEMORY_COST_PER_HOUR = 0.02 # Arbitrary cost per % Memory utilization per hour
 
-    This function calculates costs based on predefined rates for CPU, GPU, and memory,
-    and then computes the savings achieved by the resource allocator's decisions.
+# Energy constants (e.g., kWh per % utilization per hour)
+CPU_ENERGY_KWH = 0.01
+GPU_ENERGY_KWH = 0.03
+MEMORY_ENERGY_KWH = 0.005
+
+def simulate_costs(combined_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Simulates the cost and energy savings based on resource allocations.
 
     Args:
-        df_allocations (pd.DataFrame): The DataFrame containing original usage
-                                       and optimized allocation columns.
+        combined_df (pd.DataFrame): DataFrame containing original usage
+                                    and allocation decisions.
 
     Returns:
-        pd.DataFrame: The input DataFrame with added columns for original cost,
-                      optimized cost, cost saved, and energy saved.
+        pd.DataFrame: DataFrame with original cost, optimized cost, and savings.
     """
-    # --- Define Cost and Energy Parameters ---
-    # These values can be adjusted or moved to a configuration file.
-    CPU_COST_PER_HOUR = 0.05        # Cost for 100% CPU utilization for one hour
-    GPU_COST_PER_HOUR = 0.25        # Cost for 100% GPU utilization for one hour
-    MEMORY_GB_COST_PER_HOUR = 0.01  # Cost per GB of memory per hour
-    TOTAL_MEMORY_GB = 16            # Assuming a total of 16 GB memory for percentage calculations
+    results_df = combined_df.copy()
 
-    CPU_ENERGY_FACTOR_KWH = 0.001   # kWh saved per 1% CPU reduction per hour
-    GPU_ENERGY_FACTOR_KWH = 0.003   # kWh saved per 1% GPU reduction per hour
-
-    # --- Cost Calculation ---
-
-    # 1. Calculate the original cost based on actual historical usage
-    df_allocations['original_cost'] = (
-        (df_allocations['cpu_usage'] / 100 * CPU_COST_PER_HOUR) +
-        (df_allocations['gpu_usage'] / 100 * GPU_COST_PER_HOUR) +
-        (df_allocations['memory_usage'] / 100 * TOTAL_MEMORY_GB * MEMORY_GB_COST_PER_HOUR)
+    # --- Calculate Original Cost & Energy ---
+    results_df['original_cost'] = (
+        (results_df['cpu_usage'] / 100 * CPU_COST_PER_HOUR) +
+        (results_df['gpu_usage'] / 100 * GPU_COST_PER_HOUR) +
+        (results_df['memory_usage'] / 100 * MEMORY_COST_PER_HOUR)
+    )
+    results_df['original_energy_kwh'] = (
+        (results_df['cpu_usage'] / 100 * CPU_ENERGY_KWH) +
+        (results_df['gpu_usage'] / 100 * GPU_ENERGY_KWH) +
+        (results_df['memory_usage'] / 100 * MEMORY_ENERGY_KWH)
     )
 
-    # 2. Calculate the new, optimized cost based on the allocated resources
-    df_allocations['optimized_cost'] = (
-        (df_allocations['allocated_cpu'] / 100 * CPU_COST_PER_HOUR) +
-        (df_allocations['allocated_gpu'] / 100 * GPU_COST_PER_HOUR) +
-        (df_allocations['allocated_memory'] / 100 * TOTAL_MEMORY_GB * MEMORY_GB_COST_PER_HOUR)
+    # --- Calculate Optimized Usage ---
+    def get_allocated_usage(row, resource_type):
+        """Calculates the new usage percentage based on the allocation decision."""
+        # FIX: Column names now correctly match the output of resource_allocator.py
+        # e.g., 'cpu_usage_allocation', 'gpu_usage_allocation'
+        allocation_decision = row[f'{resource_type}_allocation']
+        original_usage = row[resource_type]
+
+        # Define how much to scale up or down (can be fine-tuned)
+        SCALE_DOWN_TARGET = 30.0  # Target usage % after scaling down
+        SCALE_UP_TARGET = 60.0    # Target usage % after scaling up (assumes new capacity)
+
+        if allocation_decision == 'SCALE_DOWN':
+            return SCALE_DOWN_TARGET
+        elif allocation_decision == 'SCALE_UP':
+            return SCALE_UP_TARGET
+        else: # MAINTAIN
+            return original_usage
+
+    # Create new columns for the calculated optimized usage
+    results_df['optimized_cpu_usage'] = results_df.apply(lambda row: get_allocated_usage(row, 'cpu_usage'), axis=1)
+    results_df['optimized_gpu_usage'] = results_df.apply(lambda row: get_allocated_usage(row, 'gpu_usage'), axis=1)
+    results_df['optimized_memory_usage'] = results_df.apply(lambda row: get_allocated_usage(row, 'memory_usage'), axis=1)
+
+    # --- Calculate Optimized Cost & Energy ---
+    results_df['optimized_cost'] = (
+        (results_df['optimized_cpu_usage'] / 100 * CPU_COST_PER_HOUR) +
+        (results_df['optimized_gpu_usage'] / 100 * GPU_COST_PER_HOUR) +
+        (results_df['optimized_memory_usage'] / 100 * MEMORY_COST_PER_HOUR)
+    )
+    results_df['optimized_energy_kwh'] = (
+        (results_df['optimized_cpu_usage'] / 100 * CPU_ENERGY_KWH) +
+        (results_df['optimized_gpu_usage'] / 100 * GPU_ENERGY_KWH) +
+        (results_df['optimized_memory_usage'] / 100 * MEMORY_ENERGY_KWH)
     )
 
-    # 3. Calculate the savings
-    df_allocations['cost_saved'] = df_allocations['original_cost'] - df_allocations['optimized_cost']
+    # --- Calculate Savings ---
+    results_df['cost_saved'] = results_df['original_cost'] - results_df['optimized_cost']
+    results_df['energy_saved_kwh'] = results_df['original_energy_kwh'] - results_df['optimized_energy_kwh']
 
-    # --- Energy Savings Calculation ---
-
-    # Calculate the reduction in resource usage. Use .clip(lower=0) to ignore cases where usage increased.
-    cpu_reduction = (df_allocations['cpu_usage'] - df_allocations['allocated_cpu']).clip(lower=0)
-    gpu_reduction = (df_allocations['gpu_usage'] - df_allocations['allocated_gpu']).clip(lower=0)
-
-    df_allocations['energy_saved_kwh'] = (
-        (cpu_reduction * CPU_ENERGY_FACTOR_KWH) +
-        (gpu_reduction * GPU_ENERGY_FACTOR_KWH)
-    )
-
-    return df_allocations
+    return results_df
 
