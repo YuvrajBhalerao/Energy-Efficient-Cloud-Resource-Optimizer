@@ -1,6 +1,7 @@
 import os
 import pandas as pd
-from flask import Flask, render_template, jsonify, logging
+import logging # <-- FIX: Import Python's standard logging library
+from flask import Flask, render_template, jsonify
 
 # --- Optimizer Module Imports ---
 # These imports work because the start command is `cd src && gunicorn app:app`
