@@ -3,39 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy-Efficient Cloud Optimizer</title>
+    <title>Cloud Cost & Energy Optimizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0B1120;
-            color: #E0E0E0;
+            background-color: #F8FAFC;
+            color: #1E293B;
         }
         .main-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: auto;
-            padding: 2rem;
+            padding: 1rem 2rem 4rem 2rem;
         }
         .card {
-            background-color: #1A202C;
-            border: 1px solid #2D3748;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
+            background-color: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease-in-out;
         }
-        .btn-glow {
-            box-shadow: 0 0 10px rgba(45, 212, 191, 0.5), 0 0 20px rgba(45, 212, 191, 0.3);
-            transition: all 0.3s ease;
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+            transform: translateY(-2px);
         }
-        .btn-glow:hover {
-            box-shadow: 0 0 15px rgba(45, 212, 191, 0.8), 0 0 30px rgba(45, 212, 191, 0.5);
+        .btn-primary {
+            background-image: linear-gradient(to right, #2563EB, #3B82F6);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(59, 130, 246, 0.4);
         }
         .loader {
-            border: 4px solid #2D3748;
-            border-top: 4px solid #2DD4BF;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #FFFFFF;
             border-radius: 50%;
             width: 24px;
             height: 24px;
@@ -46,116 +52,149 @@
             100% { transform: rotate(360deg); }
         }
         .input-field {
-            background-color: #2D3748;
-            border: 1px solid #4A5568;
+            background-color: #F1F5F9;
+            border: 1px solid #CBD5E1;
             border-radius: 0.5rem;
-            color: #E0E0E0;
-            padding: 0.5rem 0.75rem;
+            color: #1E293B;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
         }
         .input-field:focus {
             outline: none;
-            border-color: #2DD4BF;
-            box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.5);
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background-color: white;
         }
+        .bg-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 500px;
+            background-image: url('https://placehold.co/1920x500/EBF4FF/EBF4FF?text=+');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            opacity: 0.5;
+        }
+        .header-glow {
+            text-shadow: 0 0 20px rgba(255,255,255,0.8);
+        }
+        .result-value { transition: color 0.5s ease; }
     </style>
 </head>
 <body class="antialiased">
+    <div class="bg-pattern"></div>
     <div class="main-container">
         <!-- Header -->
-        <header class="text-center mb-12">
-            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white">Energy-Efficient Cloud Optimizer</h1>
-            <p class="mt-4 text-lg text-gray-400">Use ML to predict resource usage and simulate cost & energy savings.</p>
+        <header class="text-center py-16">
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 header-glow">Optimize Your Cloud, Instantly.</h1>
+            <p class="mt-6 text-lg max-w-2xl mx-auto text-slate-600">Leverage AI to intelligently predict resource needs, slash costs, and reduce your carbon footprint.</p>
         </header>
 
-        <!-- Simulation Parameters -->
-        <div class="card mb-8">
-            <h2 class="text-2xl font-semibold mb-6 text-white border-b border-gray-700 pb-3">Simulation Parameters</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Cost Parameters -->
-                <div>
-                    <h3 class="text-lg font-medium text-teal-400 mb-3">Cost per Hour ($)</h3>
-                    <div class="space-y-3">
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Parameters & Controls -->
+            <div class="lg:col-span-1 space-y-8">
+                <div class="card">
+                    <div class="flex items-center mb-6">
+                        <svg class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 16v-2m-6.364-1.636L4.343 18.257m13.814-13.814L16.95 5.05m-1.636 12.728L4.343 6.172m13.814 13.814L6.172 4.343"/></svg>
+                        <h2 class="text-2xl font-bold ml-3 text-slate-800">Simulation Parameters</h2>
+                    </div>
+                    
+                    <div class="space-y-6">
                         <div>
-                            <label for="cpu_cost" class="block text-sm font-medium text-gray-300">CPU Cost / %hr</label>
-                            <input type="number" id="cpu_cost_per_hour" value="0.05" step="0.01" class="input-field w-full mt-1">
+                            <h3 class="text-lg font-semibold text-slate-700 mb-3">Cost per Hour ($)</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="cpu_cost_per_hour" class="block text-sm font-medium text-slate-500">CPU Cost / %hr</label>
+                                    <input type="number" id="cpu_cost_per_hour" value="0.05" step="0.01" class="input-field w-full mt-1">
+                                </div>
+                                <div>
+                                    <label for="gpu_cost_per_hour" class="block text-sm font-medium text-slate-500">GPU Cost / %hr</label>
+                                    <input type="number" id="gpu_cost_per_hour" value="0.15" step="0.01" class="input-field w-full mt-1">
+                                </div>
+                                <div>
+                                    <label for="memory_cost_per_hour" class="block text-sm font-medium text-slate-500">Memory Cost / %hr</label>
+                                    <input type="number" id="memory_cost_per_hour" value="0.02" step="0.01" class="input-field w-full mt-1">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label for="gpu_cost" class="block text-sm font-medium text-gray-300">GPU Cost / %hr</label>
-                            <input type="number" id="gpu_cost_per_hour" value="0.15" step="0.01" class="input-field w-full mt-1">
+                        <div class="border-t border-slate-200 pt-6">
+                            <h3 class="text-lg font-semibold text-slate-700 mb-3">Energy per Hour (kWh)</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="cpu_energy_kwh" class="block text-sm font-medium text-slate-500">CPU kWh / %hr</label>
+                                    <input type="number" id="cpu_energy_kwh" value="0.01" step="0.005" class="input-field w-full mt-1">
+                                </div>
+                                <div>
+                                    <label for="gpu_energy_kwh" class="block text-sm font-medium text-slate-500">GPU kWh / %hr</label>
+                                    <input type="number" id="gpu_energy_kwh" value="0.03" step="0.005" class="input-field w-full mt-1">
+                                </div>
+                                <div>
+                                    <label for="memory_energy_kwh" class="block text-sm font-medium text-slate-500">Memory kWh / %hr</label>
+                                    <input type="number" id="memory_energy_kwh" value="0.005" step="0.001" class="input-field w-full mt-1">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label for="memory_cost" class="block text-sm font-medium text-gray-300">Memory Cost / %hr</label>
-                            <input type="number" id="memory_cost_per_hour" value="0.02" step="0.01" class="input-field w-full mt-1">
+                         <div class="border-t border-slate-200 pt-6">
+                            <h3 class="text-lg font-semibold text-slate-700 mb-3">Scaling Targets (%)</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="scale_down_target" class="block text-sm font-medium text-slate-500">Scale-Down Target</label>
+                                    <input type="number" id="scale_down_target" value="30" step="1" class="input-field w-full mt-1">
+                                </div>
+                                <div>
+                                    <label for="scale_up_target" class="block text-sm font-medium text-slate-500">Scale-Up Target</label>
+                                    <input type="number" id="scale_up_target" value="60" step="1" class="input-field w-full mt-1">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <!-- Energy Parameters -->
-                <div>
-                    <h3 class="text-lg font-medium text-teal-400 mb-3">Energy per Hour (kWh)</h3>
-                    <div class="space-y-3">
-                        <div>
-                            <label for="cpu_energy" class="block text-sm font-medium text-gray-300">CPU kWh / %hr</label>
-                            <input type="number" id="cpu_energy_kwh" value="0.01" step="0.005" class="input-field w-full mt-1">
-                        </div>
-                        <div>
-                            <label for="gpu_energy" class="block text-sm font-medium text-gray-300">GPU kWh / %hr</label>
-                            <input type="number" id="gpu_energy_kwh" value="0.03" step="0.005" class="input-field w-full mt-1">
-                        </div>
-                        <div>
-                            <label for="memory_energy" class="block text-sm font-medium text-gray-300">Memory kWh / %hr</label>
-                            <input type="number" id="memory_energy_kwh" value="0.005" step="0.001" class="input-field w-full mt-1">
-                        </div>
-                    </div>
-                </div>
-                <!-- Scaling Parameters -->
-                <div>
-                    <h3 class="text-lg font-medium text-teal-400 mb-3">Scaling Targets (%)</h3>
-                     <div class="space-y-3">
-                        <div>
-                            <label for="scale_down_target" class="block text-sm font-medium text-gray-300">Scale-Down Target</label>
-                            <input type="number" id="scale_down_target" value="30" step="1" class="input-field w-full mt-1">
-                        </div>
-                        <div>
-                            <label for="scale_up_target" class="block text-sm font-medium text-gray-300">Scale-Up Target</label>
-                            <input type="number" id="scale_up_target" value="60" step="1" class="input-field w-full mt-1">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Control Center -->
-        <div class="text-center mb-8">
-            <button id="run-btn" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full text-lg btn-glow inline-flex items-center">
-                <span id="btn-text">Run Optimization</span>
-                <div id="loader" class="loader ml-3 hidden"></div>
-            </button>
-        </div>
-
-        <!-- Results Display -->
-        <div id="results-container" class="hidden">
-            <div id="error-box" class="card bg-red-900 border-red-700 text-white p-4 mb-8 hidden"></div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="card text-center">
-                    <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider">Cost Savings</h3>
-                    <p id="cost-savings" class="text-4xl font-bold text-green-400 mt-2">$0.00</p>
-                    <p id="cost-savings-percent" class="text-gray-400 mt-1">(0.00%)</p>
-                </div>
-                <div class="card text-center">
-                    <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider">Energy Saved</h3>
-                    <p id="energy-saved" class="text-4xl font-bold text-blue-400 mt-2">0.00 kWh</p>
-                    <p id="total-intervals" class="text-gray-400 mt-1">over 0 intervals</p>
-                </div>
-                <div class="card text-center">
-                    <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider">Total Cost</h3>
-                    <p id="optimized-cost" class="text-4xl font-bold text-white mt-2">$0.00</p>
-                    <p id="original-cost" class="text-gray-400 mt-1">Original: $0.00</p>
+                <div class="sticky top-8">
+                    <button id="run-btn" class="w-full btn-primary text-white font-bold py-4 px-8 rounded-xl text-lg inline-flex items-center justify-center">
+                        <span id="btn-text">Run Optimization</span>
+                        <div id="loader" class="loader ml-3 hidden"></div>
+                    </button>
                 </div>
             </div>
 
-            <div class="card">
-                <div id="cost-chart" style="width:100%;height:400px;"></div>
+            <!-- Right Column: Results -->
+            <div class="lg:col-span-2 space-y-8">
+                <div id="results-container" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="card text-center">
+                            <h3 class="text-slate-500 font-medium uppercase tracking-wider text-sm">Cost Savings</h3>
+                            <p id="cost-savings" class="text-4xl font-bold mt-2 result-value">$0.00</p>
+                            <p id="cost-savings-percent" class="text-slate-400 mt-1 result-value">(0.00%)</p>
+                        </div>
+                        <div class="card text-center">
+                            <h3 class="text-slate-500 font-medium uppercase tracking-wider text-sm">Energy Saved</h3>
+                            <p id="energy-saved" class="text-4xl font-bold text-blue-600 mt-2">0.00 kWh</p>
+                            <p id="total-intervals" class="text-slate-400 mt-1">over 0 intervals</p>
+                        </div>
+                        <div class="card text-center">
+                            <h3 class="text-slate-500 font-medium uppercase tracking-wider text-sm">Optimized Cost</h3>
+                            <p id="optimized-cost" class="text-4xl font-bold text-slate-800 mt-2">$0.00</p>
+                            <p id="original-cost" class="text-slate-400 mt-1">Original: $0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div id="cost-chart" style="width:100%;height:450px;"></div>
+                    </div>
+                </div>
+                 <div id="placeholder-card" class="card text-center flex flex-col items-center justify-center h-full">
+                    <svg class="h-16 w-16 text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    <h3 class="text-xl font-semibold text-slate-700">Your results will appear here</h3>
+                    <p class="text-slate-500 mt-2">Adjust the parameters and click "Run Optimization" to see your potential savings.</p>
+                </div>
+                <div id="error-box" class="card bg-red-50 border-red-200 text-red-800 p-4 hidden flex items-center">
+                    <svg class="h-6 w-6 text-red-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span id="error-message"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -165,20 +204,21 @@
         const btnText = document.getElementById('btn-text');
         const loader = document.getElementById('loader');
         const resultsContainer = document.getElementById('results-container');
+        const placeholderCard = document.getElementById('placeholder-card');
         const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
 
         runBtn.addEventListener('click', runOptimization);
 
         async function runOptimization() {
-            // Show loader and disable button
             btnText.textContent = 'Optimizing...';
             loader.classList.remove('hidden');
             runBtn.disabled = true;
             resultsContainer.classList.add('hidden');
+            placeholderCard.classList.remove('hidden');
             errorBox.classList.add('hidden');
 
             try {
-                // Collect parameters from input fields
                 const simulationParams = {
                     cpu_cost_per_hour: parseFloat(document.getElementById('cpu_cost_per_hour').value),
                     gpu_cost_per_hour: parseFloat(document.getElementById('gpu_cost_per_hour').value),
@@ -192,9 +232,7 @@
 
                 const response = await fetch('api/run-optimization', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(simulationParams)
                 });
                 
@@ -207,10 +245,10 @@
                 }
             } catch (error) {
                 console.error('Optimization failed:', error);
-                errorBox.textContent = `Error: ${error.message}`;
+                errorMessage.textContent = `Error: ${error.message}`;
                 errorBox.classList.remove('hidden');
+                placeholderCard.classList.add('hidden');
             } finally {
-                // Hide loader and re-enable button
                 btnText.textContent = 'Run Optimization';
                 loader.classList.add('hidden');
                 runBtn.disabled = false;
@@ -218,37 +256,49 @@
         }
 
         function updateUI(data) {
-            document.getElementById('cost-savings').textContent = `$${data.cost_savings}`;
-            document.getElementById('cost-savings-percent').textContent = `(${data.cost_savings_percent}%)`;
+            const costSavingsEl = document.getElementById('cost-savings');
+            const costSavingsPercentEl = document.getElementById('cost-savings-percent');
+            
+            costSavingsEl.textContent = `$${data.cost_savings}`;
+            costSavingsPercentEl.textContent = `(${data.cost_savings_percent}%)`;
+            
+            // Dynamically change color based on savings
+            if (data.cost_savings > 0) {
+                costSavingsEl.classList.remove('text-red-500');
+                costSavingsEl.classList.add('text-green-600');
+            } else {
+                costSavingsEl.classList.remove('text-green-600');
+                costSavingsEl.classList.add('text-red-500');
+            }
+
             document.getElementById('energy-saved').textContent = `${data.energy_saved_kwh} kWh`;
             document.getElementById('total-intervals').textContent = `over ${data.total_intervals} intervals`;
             document.getElementById('optimized-cost').textContent = `$${data.optimized_cost}`;
             document.getElementById('original-cost').textContent = `Original: $${data.original_cost}`;
             
-            // Unhide the results
             resultsContainer.classList.remove('hidden');
+            placeholderCard.classList.add('hidden');
 
-            // Update chart
             const plotData = [{
                 x: ['Original Cost', 'Optimized Cost'],
                 y: [data.original_cost, data.optimized_cost],
                 type: 'bar',
-                marker: {
-                    color: ['#EF4444', '#2DD4BF']
-                },
+                marker: { color: ['#F87171', '#34D399'] },
                 text: [`$${data.original_cost}`, `$${data.optimized_cost}`],
-                textposition: 'auto',
+                textposition: 'outside',
+                hoverinfo: 'none'
             }];
 
             const layout = {
-                title: 'Cost Comparison',
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { color: '#E0E0E0' },
-                yaxis: { title: 'Cost ($)', gridcolor: '#2D3748' },
+                title: { text: 'Cost Comparison', font: { size: 20, color: '#334155' }},
+                paper_bgcolor: 'white',
+                plot_bgcolor: 'white',
+                font: { color: '#475569' },
+                yaxis: { title: 'Cost ($)', gridcolor: '#E2E8F0', zerolinecolor: '#CBD5E1' },
+                bargap: 0.4
             };
 
-            Plotly.newPlot('cost-chart', plotData, layout, {responsive: true});
+            Plotly.newPlot('cost-chart', plotData, layout, {responsive: true, displaylogo: false});
         }
     </script>
 </body>
