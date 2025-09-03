@@ -1,55 +1,36 @@
 import pandas as pd
-from typing import Optional
 
-def load_metrics_data(filepath: str, parse_dates: Optional[list] = None) -> pd.DataFrame:
+def load_and_preprocess_data(file_path: str) -> pd.DataFrame:
     """
-    Loads telemetry data from a CSV file into a pandas DataFrame.
+    Loads data from a CSV file and performs basic preprocessing.
 
     Args:
-        filepath (str): The path to the CSV file.
-        parse_dates (Optional[list]): A list of column names to parse as dates.
+        file_path (str): The path to the CSV file.
 
     Returns:
-        pd.DataFrame: A DataFrame containing the loaded data.
-    
-    Raises:
-        FileNotFoundError: If the file at the specified path does not exist.
-        Exception: For other potential errors during file loading.
+        pd.DataFrame: A preprocessed DataFrame.
     """
     try:
-        print(f"Attempting to load data from: {filepath}")
-        df = pd.read_csv(filepath, parse_dates=parse_dates)
-        print("Data loaded successfully.")
-        
-        # --- Basic Preprocessing ---
-        
-        # Handle missing values - for simplicity, we'll forward-fill
-        # This assumes that a missing value is likely the same as the previous reading.
+        # Load the dataset
+        df = pd.read_csv(file_path)
+
+        # --- Preprocessing Steps ---
+
+        # 1. Convert timestamp to datetime objects
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+        # 2. Set timestamp as the index
+        df.set_index('timestamp', inplace=True)
+
+        # 3. Handle any potential missing values (e.g., forward fill)
         df.ffill(inplace=True)
-        print("Missing values handled using forward-fill.")
-        
+
         return df
 
     except FileNotFoundError:
-        print(f"Error: The file '{filepath}' was not found.")
+        print(f"Error: The file was not found at {file_path}")
         raise
     except Exception as e:
-        print(f"An unexpected error occurred while loading the data: {e}")
+        print(f"An error occurred during data loading or preprocessing: {e}")
         raise
 
-if __name__ == '__main__':
-    # Example usage when running this script directly
-    # Note: Adjust the path based on your project's root directory structure.
-    # This might fail if run from src/optimizer; run from the project root.
-    try:
-        sample_path = 'data/sample_metrics.csv'
-        metrics_df = load_metrics_data(sample_path, parse_dates=['timestamp'])
-        print("\n--- Data Loader Example ---")
-        print("Data loaded and preprocessed. First 5 rows:")
-        print(metrics_df.head())
-        print("\nData Info:")
-        metrics_df.info()
-    except FileNotFoundError:
-        print("\nCould not run example: Ensure 'data/sample_metrics.csv' exists and you are running from the project root.")
-    except Exception as e:
-        print(f"\nAn error occurred during the example run: {e}")
